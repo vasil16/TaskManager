@@ -1,0 +1,119 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Task Manager - Minimal Frontend</title>
+  <style>
+    body{font-family: Arial; max-width:700px;margin:2rem auto;}
+    input, button, textarea{padding:8px;margin:6px 0;width:100%;}
+    .task{border:1px solid #ddd;padding:8px;margin:6px 0;}
+  </style>
+</head>
+<body>
+  <h2>Task Manager (Minimal)</h2>
+
+  <div id="auth">
+    <h3>Register</h3>
+    <input id="regEmail" placeholder="email" />
+    <input id="regPass" type="password" placeholder="password" />
+    <button id="btnRegister">Register</button>
+
+    <h3>Login</h3>
+    <input id="loginEmail" placeholder="email" />
+    <input id="loginPass" type="password" placeholder="password" />
+    <button id="btnLogin">Login</button>
+  </div>
+
+  <div id="app" style="display:none;">
+    <button id="btnLogout">Logout</button>
+    <h3>Create Task</h3>
+    <input id="title" placeholder="title" />
+    <textarea id="desc" placeholder="description"></textarea>
+    <button id="btnCreate">Create</button>
+
+    <h3>Your Tasks</h3>
+    <div id="tasks"></div>
+  </div>
+
+<script>
+const API = '';
+
+function setToken(t){ localStorage.setItem('token', t); }
+
+function getToken(){ return localStorage.getItem('token'); }
+
+document.getElementById('btnRegister').onclick = async () => {
+  const email = document.getElementById('regEmail').value;
+  const password = document.getElementById('regPass').value;
+  const res = await fetch('/auth/register', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email,password})
+  });
+  const data = await res.json();
+  if(data.token){ setToken(data.token); showApp(); }
+  else alert(JSON.stringify(data));
+};
+
+document.getElementById('btnLogin').onclick = async () => {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPass').value;
+  const res = await fetch('/auth/login', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email,password})
+  });
+  const data = await res.json();
+  if(data.token){ setToken(data.token); showApp(); }
+  else alert(JSON.stringify(data));
+};
+
+document.getElementById('btnLogout').onclick = () => {
+  localStorage.removeItem('token'); showAuth();
+};
+
+document.getElementById('btnCreate').onclick = async () => {
+  const title = document.getElementById('title').value;
+  const description = document.getElementById('desc').value;
+  const res = await fetch('/tasks', {
+    method:'POST',
+    headers:{'Content-Type':'application/json', 'Authorization':'Bearer '+getToken()},
+    body: JSON.stringify({title,description})
+  });
+  if(res.ok){ await loadTasks(); }
+  else { alert('Error creating task'); }
+};
+
+async function loadTasks(){
+  const res = await fetch('/tasks', {headers:{'Authorization':'Bearer '+getToken()}});
+  if(!res.ok){ alert('Failed to load tasks'); return; }
+  const list = await res.json();
+  const container = document.getElementById('tasks');
+  container.innerHTML = '';
+  list.forEach(t => {
+    const el = document.createElement('div');
+    el.className='task';
+    el.innerHTML = `<strong>${t.title}</strong> <p>${t.description||''}</p>
+      <div>Completed: ${t.completed}</div>
+      <button onclick='markDone(${t.id})'>Mark Done</button>
+      <button onclick='del(${t.id})'>Delete</button>`;
+    container.appendChild(el);
+  });
+}
+
+window.markDone = async (id) => {
+  await fetch('/tasks/'+id+'/done',{method:'PUT', headers:{'Authorization':'Bearer '+getToken()}});
+  await loadTasks();
+};
+
+window.del = async (id) => {
+  await fetch('/tasks/'+id,{method:'DELETE', headers:{'Authorization':'Bearer '+getToken()}});
+  await loadTasks();
+};
+
+function showApp(){ document.getElementById('auth').style.display='none'; document.getElementById('app').style.display='block'; loadTasks(); }
+function showAuth(){ document.getElementById('auth').style.display='block'; document.getElementById('app').style.display='none'; }
+
+if(getToken()) showApp(); else showAuth();
+</script>
+</body>
+</html>

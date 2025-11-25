@@ -1,0 +1,481 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Task Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* 🎨 Sophisticated & Modern Color Palette */
+    :root {
+      --primary-color: #0077b6;
+      /* Deep Cerulean Blue */
+      --secondary-color: #f8f9fa;
+      /* Very Light Gray Background */
+      --card-bg-color: #ffffff;
+      /* Pure White Cards */
+      --text-color: #212529;
+      /* Near-Black Text */
+      --light-text: #6c757d;
+      /* Muted Gray for descriptions */
+      --success-color: #28a745;
+      /* Standard Success Green */
+      --danger-color: #dc3545;
+      --border-radius-large: 12px;
+      --border-radius-small: 8px;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--secondary-color);
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    /* --- Headings --- */
+    h2 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-top: 1rem;
+      margin-bottom: 2.5rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    h3 {
+      font-size: 1.35rem;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-color);
+      font-weight: 600;
+    }
+
+    /* --- Auth Container Fix (Too Wide) --- */
+    #auth {
+      max-width: 400px;
+      /* Constrain width for better look on wide screens */
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* --- Inputs and Textareas --- */
+    input,
+    textarea {
+      box-sizing: border-box;
+      padding: 12px 15px;
+      margin: 10px 0;
+      width: 100%;
+      border: 1px solid #ced4da;
+      border-radius: var(--border-radius-small);
+      font-size: 1rem;
+      background-color: var(--card-bg-color);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.15);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    /* --- Primary Buttons --- */
+    button {
+      padding: 14px;
+      margin: 12px 0;
+      width: 100%;
+      border: none;
+      border-radius: var(--border-radius-small);
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      color: white;
+      background-color: var(--primary-color);
+      box-shadow: 0 4px 6px rgba(0, 119, 182, 0.2);
+    }
+
+    button:hover {
+      background-color: #005a8b;
+    }
+
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 4px rgba(0, 119, 182, 0.2);
+    }
+
+    /* --- Logout Button --- */
+    #btnLogout {
+      background-color: var(--danger-color);
+      margin-top: 0;
+      border-radius: var(--border-radius-large);
+      box-shadow: none;
+    }
+
+    #btnLogout:hover {
+      background-color: #c82333;
+    }
+
+
+    /* --- Segmented Control for Dashboard Actions --- */
+    .dashboard-actions {
+      display: flex;
+      gap: 1px;
+      background-color: #e9ecef;
+      padding: 3px;
+      border-radius: var(--border-radius-small);
+      margin-bottom: 25px;
+    }
+
+    .dashboard-actions button {
+      flex: 1;
+      margin: 0;
+      background-color: transparent;
+      color: var(--light-text);
+      padding: 10px 10px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      box-shadow: none;
+    }
+
+    /* Active Segmented Button */
+    .dashboard-actions button.active {
+      background-color: var(--card-bg-color);
+      color: var(--primary-color);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      font-weight: 600;
+    }
+
+    /* --- Task Card List --- */
+    .task {
+      background-color: var(--card-bg-color);
+      padding: 18px;
+      margin: 15px 0;
+      border-radius: var(--border-radius-large);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border-left: 4px solid var(--primary-color);
+      transition: all 0.3s ease;
+    }
+
+    .task[data-completed="true"] {
+      border-left-color: var(--success-color);
+      opacity: 0.8;
+      background-color: #f8fff8;
+    }
+
+    .task strong {
+      display: block;
+      font-size: 1.15rem;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .task[data-completed="true"] strong,
+    .task[data-completed="true"] p {
+      text-decoration: line-through;
+      color: var(--light-text);
+    }
+
+    .task p {
+      margin: 0 0 15px 0;
+      font-size: 0.9rem;
+      color: var(--light-text);
+    }
+
+    .task .status {
+      font-size: 0.8rem;
+      color: #999;
+      margin-bottom: 15px;
+      display: block;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    .task .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .task button {
+      width: auto;
+      padding: 8px 15px;
+      margin: 0;
+      font-size: 0.9rem;
+      box-shadow: none;
+      font-weight: 500;
+    }
+
+    .task button:last-child {
+      background-color: #6c757d;
+    }
+
+    .task button[onclick^='markDone'] {
+      background-color: var(--success-color);
+    }
+
+    /* --- General Structure --- */
+    #auth>div,
+    #dashboard>div:not(.dashboard-actions) {
+      background-color: var(--card-bg-color);
+      padding: 25px;
+      border-radius: var(--border-radius-large);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toast" style="
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 250px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    display: none;
+    z-index: 9999;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+"></div>
+
+  <h2><i class="fas fa-list-check"></i> Task Flow Manager</h2>
+
+  <div id="auth">
+    <div id="register-container">
+      <h3><i class="fas fa-user-plus"></i> Register</h3>
+      <input id="regEmail" placeholder="Email" />
+      <input id="regPass" type="password" placeholder="Password" />
+      <button id="btnRegister"><i class="fas fa-sign-in-alt"></i> Register</button>
+    </div>
+
+    <div id="login-container">
+      <h3 style="margin-top: 2rem;"><i class="fas fa-lock"></i> Login</h3>
+      <input id="loginEmail" placeholder="Email" />
+      <input id="loginPass" type="password" placeholder="Password" />
+      <button id="btnLogin"><i class="fas fa-arrow-right-to-bracket"></i> Login</button>
+    </div>
+  </div>
+
+  <div id="dashboard" style="display:none;">
+    <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    <div class="dashboard-actions">
+      <button id="btnShowCreate"><i class="fas fa-plus"></i> Create</button>
+      <button id="btnShowUpcoming" class="active"><i class="fas fa-hourglass-half"></i> Upcoming</button>
+      <button id="btnShowCompleted"><i class="fas fa-check-double"></i> Completed</button>
+    </div>
+
+    <div id="createTask" style="display:none;">
+      <h3><i class="fas fa-pencil-alt"></i> Create New Task</h3>
+      <input id="title" placeholder="Task Title (e.g., Finish report draft)" />
+      <textarea id="desc" placeholder="Task Details"></textarea>
+      <button id="btnCreate"><i class="fas fa-save"></i> Save Task</button>
+    </div>
+
+    <div id="tasksList">
+      <h3><i class="fas fa-tasks"></i> Task List</h3>
+      <div id="tasks"></div>
+    </div>
+  </div>
+
+  <script>
+    const API = '';
+    function showToast(message, type = 'error', duration = 3000) {
+      const toast = document.getElementById('toast');
+      toast.innerText = message;
+      toast.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
+      toast.style.display = 'block';
+      toast.style.opacity = 1;
+
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.5s';
+        toast.style.opacity = 0;
+        setTimeout(() => {
+          toast.style.display = 'none';
+          toast.style.transition = '';
+        }, 500);
+      }, duration);
+    }
+    function setToken(t) { localStorage.setItem('token', t); }
+    function getToken() { return localStorage.getItem('token'); }
+
+    function showAuth() { document.getElementById('auth').style.display = 'block'; document.getElementById('dashboard').style.display = 'none'; }
+    function showDashboard() { document.getElementById('auth').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; loadTasks(); }
+
+    function setActiveButton(activeId) {
+      document.querySelectorAll('.dashboard-actions button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      if (activeId) {
+        document.getElementById(activeId).classList.add('active');
+      }
+    }
+
+    // --- Authentication Logic (Modified to clear inputs) ---
+    const regEmail = document.getElementById('regEmail');
+    const regPass = document.getElementById('regPass');
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPass = document.getElementById('loginPass');
+
+    document.getElementById('btnRegister').onclick = async () => {
+      try {
+        const res = await fetch('/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: regEmail.value, password: regPass.value })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.token) {
+          setToken(data.token);
+          regEmail.value = '';
+          regPass.value = '';
+          showDashboard();
+          showToast('Registration successful!', 'success');
+        } else {
+          showToast(data.message || 'Registration failed. Please try again.');
+        }
+      } catch (err) {
+        showToast('Network error. Please try again.');
+        console.error(err);
+      }
+    };
+
+    document.getElementById('btnLogin').onclick = async () => {
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: loginEmail.value, password: loginPass.value })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.token) {
+          setToken(data.token);
+          loginEmail.value = '';
+          loginPass.value = '';
+          showDashboard();
+          showToast('Login successful!', 'success');
+        } else {
+          showToast(data.message || 'Login failed. Please check credentials.');
+        }
+      } catch (err) {
+        showToast('Network error. Please try again.');
+        console.error(err);
+      }
+    };
+
+    document.getElementById('btnLogout').onclick = () => { localStorage.removeItem('token'); showAuth(); }
+    // ----------------------------------------
+
+    // --- View Switching ---
+    document.getElementById('btnShowCreate').onclick = () => {
+      document.getElementById('createTask').style.display = 'block';
+      document.getElementById('tasksList').style.display = 'none';
+      setActiveButton('btnShowCreate');
+    };
+
+    document.getElementById('btnShowUpcoming').onclick = () => { showTasks(false, 'btnShowUpcoming'); };
+    document.getElementById('btnShowCompleted').onclick = () => { showTasks(true, 'btnShowCompleted'); };
+
+    document.getElementById('btnCreate').onclick = async () => {
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('desc').value;
+      const res = await fetch('/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        body: JSON.stringify({ title, description })
+      });
+      if (res.ok) {
+        document.getElementById('title').value = '';
+        document.getElementById('desc').value = '';
+        showTasks(false, 'btnShowUpcoming');
+      }
+      else showToast('Error creating task', 'error');
+    };
+
+    async function loadTasks() {
+      const res = await fetch('/tasks', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+      if (!res.ok) { showToast(data.message || 'Failed to load tasks'); return []; }
+      const tasks = await res.json();
+      return tasks;
+    }
+
+    function showTasks(completed, activeBtnId) {
+      document.getElementById('createTask').style.display = 'none';
+      document.getElementById('tasksList').style.display = 'block';
+      setActiveButton(activeBtnId);
+
+      loadTasks().then(tasks => {
+        renderTasks(tasks, completed);
+      });
+    }
+
+    function renderTasks(tasks, filterCompleted) {
+      const container = document.getElementById('tasks');
+      container.innerHTML = '';
+
+      const filteredTasks = tasks.filter(t => t.completed === filterCompleted);
+
+      if (filteredTasks.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: var(--light-text); padding: 20px; border: 1px dashed #ced4da; border-radius: 8px;">No ${filterCompleted ? 'completed' : 'upcoming'} tasks yet!</p>`;
+        return;
+      }
+
+      filteredTasks.forEach(t => {
+        const el = document.createElement('div');
+        el.className = 'task';
+        el.setAttribute('data-completed', t.completed);
+        el.innerHTML = `
+                <strong>${t.title}</strong>
+                <p>${t.description || ''}</p>
+                <span class="status">${t.completed ? 'COMPLETED' : 'PENDING'}</span>
+                <div class="action-buttons">
+                    ${!t.completed ? `<button onclick='markDone(${t.id})'><i class="fas fa-check"></i> Mark Done</button>` : ''}
+                    <button onclick='del(${t.id})'><i class="fas fa-trash-alt"></i> Delete</button>
+                </div>
+            `;
+        container.appendChild(el);
+      });
+    }
+
+    window.markDone = async (id) => {
+      await fetch('/tasks/' + id + '/done', { method: 'PUT', headers: { 'Authorization': 'Bearer ' + getToken() } });
+      const currentViewId = document.querySelector('.dashboard-actions button.active').id;
+      // Reload and switch to completed view if the current view was Upcoming
+      showTasks(currentViewId === 'btnShowCompleted', currentViewId);
+    }
+
+    window.del = async (id) => {
+      await fetch('/tasks/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });
+      const currentViewId = document.querySelector('.dashboard-actions button.active').id;
+      showTasks(currentViewId === 'btnShowCompleted', currentViewId);
+    }
+
+    // --- Initialization ---
+    if (getToken()) {
+      showDashboard();
+      // Initially show Upcoming tasks and set button to active
+      showTasks(false, 'btnShowUpcoming');
+    } else {
+      showAuth();
+    }
+  </script>
+</body>
+
+</html>
