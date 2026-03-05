@@ -1,5 +1,5 @@
 
-# Task Manager (Option A) - Java Spring Boot (Minimal Frontend)
+# Task Manager - Java Spring Boot (Minimal Frontend)
 
 This project is a minimal production-style Task Manager backend built with:
 - Java 17
@@ -25,4 +25,4 @@ This project is a minimal production-style Task Manager backend built with:
 Open `frontend/index.html` and use the UI to register/login and manage tasks (it talks to the same server at :8080).
 
 ## Notes
-- This is an educational / resume-ready project. Replace JWT secret and configure secure storage for production.
+- This is an educational / resume-ready project. 
